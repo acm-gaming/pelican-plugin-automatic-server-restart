@@ -9,6 +9,7 @@ use App\Enums\SubuserPermission;
 use App\Enums\TablerIcon;
 use App\Filament\Server\Pages\Settings;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -21,21 +22,17 @@ class AutomaticServerRestartPluginProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
-    }
-
-    public function boot(): void
-    {
         Settings::registerCustomHeaderActions(
             HeaderActionPosition::After,
             Action::make('automaticServerRestart')
                 ->label('Auto Restart')
                 ->icon(TablerIcon::Clock)
-                ->visible(fn (\App\Models\Server $server) => user()?->can(SubuserPermission::SettingsRename, $server))
+                ->visible(fn () => user()?->can(SubuserPermission::SettingsRename, Filament::getTenant()))
                 ->modal()
                 ->modalHeading('Automatic server restart')
                 ->modalSubmitActionLabel('Save')
-                ->schema(function (\App\Models\Server $server): array {
+                ->schema(function (): array {
+                    $server = Filament::getTenant();
                     $setting = AutomaticServerRestartSetting::query()
                         ->where('server_id', $server->id)
                         ->first();
@@ -59,7 +56,8 @@ class AutomaticServerRestartPluginProvider extends ServiceProvider
                             ->default($setting?->announcement_command),
                     ];
                 })
-                ->action(function (array $data, \App\Models\Server $server): void {
+                ->action(function (array $data): void {
+                    $server = Filament::getTenant();
                     AutomaticServerRestartSetting::query()->updateOrCreate(
                         ['server_id' => $server->id],
                         [
@@ -76,7 +74,10 @@ class AutomaticServerRestartPluginProvider extends ServiceProvider
                         ->send();
                 })
         );
+    }
 
+    public function boot(): void
+    {
         $this->app->booted(function (): void {
             $this->app->make(Schedule::class)
                 ->command(ProcessAutomaticServerRestartCommand::class)

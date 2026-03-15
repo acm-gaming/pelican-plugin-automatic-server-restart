@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('automatic_server_restart_settings', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('server_id')->unique()->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('server_id')->unique();
+            $table->foreign('server_id')->references('id')->on('servers')->cascadeOnDelete();
             $table->boolean('enabled')->default(false);
             $table->string('restart_time', 5)->nullable();
             $table->string('timezone')->default('UTC');

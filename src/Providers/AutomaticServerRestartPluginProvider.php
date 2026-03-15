@@ -21,6 +21,11 @@ class AutomaticServerRestartPluginProvider extends ServiceProvider
 {
     public function register(): void
     {
+        //
+    }
+
+    public function boot(): void
+    {
         Settings::registerCustomHeaderActions(
             HeaderActionPosition::After,
             Action::make('automaticServerRestart')
@@ -71,10 +76,7 @@ class AutomaticServerRestartPluginProvider extends ServiceProvider
                         ->send();
                 })
         );
-    }
 
-    public function boot(): void
-    {
         $this->app->booted(function (): void {
             $this->app->make(Schedule::class)
                 ->command(ProcessAutomaticServerRestartCommand::class)

@@ -1,19 +1,19 @@
 {
-    "id": "automatic-server-restart",
-    "name": "Automatic Server Restart",
-    "author": "acmgaming",
-    "version": "1.1.0",
-    "description": null,
-    "category": "plugin",
-    "url": null,
-    "update_url": "https://raw.githubusercontent.com/acm-gaming/pelican-plugin-automatic-server-restart/main/update.json",
-    "namespace": "Acmgaming\\AutomaticServerRestart",
-    "class": "AutomaticServerRestartPlugin",
-    "panels": null,
-    "panel_version": null,
-    "composer_packages": null,
-    "meta": {
-        "status": "enabled",
-        "status_message": null
-    }
+  "id": "automatic-server-restart",
+  "name": "Automatic Server Restart",
+  "author": "acmgaming",
+  "version": "1.1.0",
+  "description": null,
+  "category": "plugin",
+  "url": null,
+  "update_url": "https://raw.githubusercontent.com/acm-gaming/pelican-plugin-automatic-server-restart/main/update.json",
+  "namespace": "Acmgaming\\AutomaticServerRestart",
+  "class": "AutomaticServerRestartPlugin",
+  "panels": null,
+  "panel_version": null,
+  "composer_packages": null,
+  "meta": {
+    "status": "enabled",
+    "status_message": null
+  }
 }

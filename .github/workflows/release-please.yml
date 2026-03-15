@@ -1,0 +1,89 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release-please.outputs.release_created }}
+      tag_name: ${{ steps.release-please.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release-please
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish-assets-and-update-manifests:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate release values
+        id: vars
+        run: |
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+          VERSION="${TAG#v}"
+          PLUGIN_ID="$(jq -r '.id' plugin.json)"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "plugin_id=$PLUGIN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Build plugin zip asset
+        run: |
+          PLUGIN_ID="${{ steps.vars.outputs.plugin_id }}"
+          STAGING_DIR="$(mktemp -d)"
+          rsync -a --exclude='.git' \
+                   --exclude='.github' \
+                   --exclude='release-please-config.json' \
+                   --exclude='.release-please-manifest.json' \
+                   --exclude='update.json' \
+                   ./ "$STAGING_DIR/$PLUGIN_ID/"
+          cd "$STAGING_DIR"
+          zip -r "$GITHUB_WORKSPACE/$PLUGIN_ID.zip" "$PLUGIN_ID"
+
+      - name: Upload release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ steps.vars.outputs.tag }}" \
+            "${{ steps.vars.outputs.plugin_id }}.zip" \
+            --clobber
+
+      - name: Update plugin and update manifests
+        run: |
+          chmod +x .github/scripts/update-release-metadata.sh
+          .github/scripts/update-release-metadata.sh \
+            "${{ steps.vars.outputs.version }}" \
+            "${{ steps.vars.outputs.tag }}" \
+            "${{ github.repository }}"
+
+      - name: Commit manifest updates
+        run: |
+          if git diff --quiet -- plugin.json update.json; then
+            echo "No manifest updates to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add plugin.json update.json
+          git commit -m "chore: update plugin manifests for ${{ steps.vars.outputs.version }}"
+          git push

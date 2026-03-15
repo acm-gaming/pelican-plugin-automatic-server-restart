@@ -6,5 +6,9 @@
   "1.1.1": {
     "version": "1.1.1",
     "download_url": "https://github.com/acm-gaming/pelican-plugin-automatic-server-restart/releases/download/v1.1.1/automatic-server-restart.zip"
+  },
+  "1.1.2": {
+    "version": "1.1.2",
+    "download_url": "https://github.com/acm-gaming/pelican-plugin-automatic-server-restart/releases/download/v1.1.2/automatic-server-restart.zip"
   }
 }

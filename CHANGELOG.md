@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/acm-gaming/pelican-plugin-automatic-server-restart/compare/v1.1.1...v1.1.2) (2026-03-15)
+
+
+### Bug Fixes
+
+* use correct column type for server_id and resolve Filament tenant ([46e8d95](https://github.com/acm-gaming/pelican-plugin-automatic-server-restart/commit/46e8d953a5d2818c2ddcdd28ac6d4afcb8004345))
+
 ## [1.1.1](https://github.com/acm-gaming/pelican-plugin-automatic-server-restart/compare/v1.1.0...v1.1.1) (2026-03-15)
 
 
